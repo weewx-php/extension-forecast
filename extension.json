@@ -1,0 +1,12 @@
+{
+  "id": "forecast",
+  "name": "Forecast",
+  "description": "Open-Meteo · 1–16 days",
+  "version": "0.1.0",
+  "entry": "extension.php",
+  "api": 2,
+  "settings": "settings.json",
+  "php": "8.1",
+  "requires": ["json"],
+  "license": "GPL-3.0-or-later"
+}

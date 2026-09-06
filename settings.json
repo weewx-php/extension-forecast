@@ -1,0 +1,11 @@
+{
+  "schema": 1,
+  "scope": "archive",
+  "fields": [
+    {"key": "enabled", "type": "boolean", "label": {"de": "Vorhersage", "en": "Forecast"}, "default": true},
+    {"key": "days", "type": "integer", "label": {"de": "Tage", "en": "Days"}, "default": 7, "min": 1, "max": 16},
+    {"key": "every", "type": "integer", "label": {"de": "Abrufintervall (Sekunden)", "en": "Refresh interval (seconds)"}, "default": 3600, "min": 1800, "max": 86400},
+    {"key": "timeout", "type": "integer", "label": {"de": "Timeout (Sekunden)", "en": "Timeout (seconds)"}, "default": 8, "min": 1, "max": 30},
+    {"key": "api_key", "type": "secret", "format": "api_key", "label": {"de": "API-Schlüssel", "en": "API key"}, "default": ""}
+  ]
+}
