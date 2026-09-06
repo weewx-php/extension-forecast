@@ -1,0 +1,18 @@
+name: weewx-extension-forecast
+
+services:
+  unit:
+    image: weewx-php-tests
+    volumes:
+      - ${WEEWX_PHP_ROOT:?Set WEEWX_PHP_ROOT to the core checkout}:/repo:ro
+      - ${WEEWX_DEMO_THEME_ROOT:?Set WEEWX_DEMO_THEME_ROOT to the demo theme checkout}:/theme:ro
+      - ../..:/extension:ro
+    tmpfs:
+      - /tmp
+    working_dir: /extension
+    network_mode: none
+    environment:
+      WEEWX_PHP_ROOT: /repo
+      WEEWX_DEMO_THEME_ROOT: /theme
+      WEEWX_PHP_TMP: /tmp
+    command: ["/opt/build/vendor/bin/phpunit", "--no-configuration", "--do-not-cache-result", "--bootstrap", "tests/bootstrap.php", "tests"]

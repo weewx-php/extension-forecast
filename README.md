@@ -82,6 +82,26 @@ Report ohne `date`. Werte: `outTempMin`, `outTempMax`, `rain`, `rainProbability`
 `windSpeed`, `windGust`, `windDir`, `sunshineDur`, `weatherCode`.
 Metadaten: `start`, `end`, `date`, `source`, `fetched_at`.
 
+### Daily weather symbol
+
+The daily `weatherCode` represents the prevailing daylight condition. Open-Meteo's
+daily code instead describes the most severe condition over 24 hours, so brief
+morning fog can otherwise label an entire sunny day as foggy.
+
+Hourly codes are grouped by condition, including clear/mainly clear together.
+Only instants with the sun at or above -0.833 degrees count. Their weight is
+`1 + sin(max(0, solar altitude))`, giving the hours near solar noon more influence.
+The winning group supplies its most strongly represented WMO code; exact ties
+prefer the code with the greater numeric value. Daytime thunderstorms and
+freezing precipitation take precedence even when brief.
+
+The calculation uses the archive's coordinates and local calendar boundaries,
+including 23/25-hour days. During polar night, all hours receive equal weight.
+If valid hourly codes cover less than 75% of the expected weight, the original
+daily code is retained. Existing caches work immediately. Hourly codes, daily
+temperature ranges, precipitation totals and sunshine duration remain provider
+values. Today's symbol represents the whole daylight period even in the evening.
+
 `forecast.hourly`: 1–384 Stunden, begrenzt durch den Cache. Werte: `outTemp`,
 `dewpoint`, `outHumidity`, `rain`, `rainProbability`, `radiation`, `cloudcover`,
 `windSpeed`, `windGust`, `windDir`, `weatherCode`, `snow`, `visibility`.
@@ -119,8 +139,13 @@ Recovery kommen vom Core. Themes wechseln von `$wx->forecast()` auf die Tags.
 
 ## Tests
 
+Run the suite in Docker using the core test image and the separate demo theme:
+
 ```bash
-WEEWX_PHP_ROOT=/path/to/weewx-php /path/to/weewx-php/vendor/bin/phpunit --no-configuration --bootstrap tests/bootstrap.php tests
+export WEEWX_PHP_ROOT=/path/to/weewx-php
+export WEEWX_DEMO_THEME_ROOT=/path/to/theme-demo
+docker compose -f "$WEEWX_PHP_ROOT/tests/docker/compose.yml" build unit
+docker compose -f tests/docker/compose.yml run --rm unit
 ```
 
 [Prüfbericht](docs/review.md). Die ursprünglichen Cache- und Darstellungsregeln

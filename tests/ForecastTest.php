@@ -26,7 +26,8 @@ use WeewxPhp\Tick\Runtime;
 use WeewxPhp\Tick\Tick;
 use WeewxPhp\Time\FixedClock;
 
-require_once (string) getenv('WEEWX_PHP_ROOT') . '/themes/demo/Forecast.php';
+$demoTheme = getenv('WEEWX_DEMO_THEME_ROOT');
+require_once ($demoTheme === false ? (string) getenv('WEEWX_PHP_ROOT') . '/themes/demo' : $demoTheme) . '/Forecast.php';
 require_once dirname(__DIR__) . '/extension.php';
 
 final class ForecastTest extends TestCase

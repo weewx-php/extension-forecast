@@ -1,5 +1,47 @@
 # Forecast 0.1.0 review — 2026-09-06
 
+## 0.1.1 daylight symbol update — 2026-09-06
+
+Scope: daily symbol selection in `src/Reader.php`, regression tests and Docker
+test setup. Reviewed by Codex using the security-review checklist.
+
+The ALL-INKL cache fetched at 17:32:09 UTC contained fog only at 07:00/08:00
+local time, clear/mainly clear conditions from 09:00 through 16:00, 12 sunshine
+hours and no rain. The provider's daily code was 45. Replaying the same cache
+now produces code 0. The rainy day on September 9 still produces a rain symbol
+(61), retaining its 13 mm precipitation total.
+
+- Docker PHP 8.1.34: 21 tests / 184 assertions; demo theme: 3 tests / 17 assertions.
+- PHPStan maximum level and PHP-CS-Fixer checks pass for the changed PHP files.
+- Regression cases cover morning/night fog, prevailing cloud/rain/snow,
+  short daytime thunderstorms/freezing rain, clear-code grouping, solar weighting,
+  missing/invalid codes, null/zero fallbacks, evening stability, DST, negative and
+  fractional timezone offsets, the date line and polar day/night.
+- Daily values and hourly codes remain provider data except for the daily symbol.
+  Reader operations use existing validated caches without writes or network calls.
+
+### Security review
+
+**Security-Sensitive:** YES (selection from provider input).
+**Reviewed By:** Codex. **OWASP Categories Checked:** 10/10.
+
+| Category | Result |
+|---|---|
+| A01 Access control | PASS: existing tag access and archive boundaries preserved. |
+| A02 Cryptography | N/A: no cryptographic or credential changes. |
+| A03 Injection | PASS: numeric allowlist; no SQL, shell or markup construction. |
+| A04 Design | PASS: bounded hourly loops, solar geometry independent of weather, 75% coverage fallback. |
+| A05 Configuration | PASS: no endpoint, settings or runtime configuration changes. |
+| A06 Components | PASS: no new dependencies; uses the core solar calculation. |
+| A07 Authentication | N/A: no authentication changes. |
+| A08 Integrity | PASS: finite validated data, integral WMO-code allowlist, missing data preserved. |
+| A09 Logging | N/A: no new logs or sensitive output. |
+| A10 SSRF | N/A: no network access added. |
+
+Dependency audit: the package has no Composer dependencies; the core production
+lock contains no packages to audit. No critical/high or deferred findings.
+**Security Review Status:** PASS.
+
 Scope: entry point, source, settings metadata and explicit CLI migration.
 Reviewed by Codex with the security-review checklist, not an independent audit.
 

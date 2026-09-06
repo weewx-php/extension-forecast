@@ -2,7 +2,7 @@
   "id": "forecast",
   "name": "Forecast",
   "description": "Open-Meteo · 1–16 days",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "entry": "extension.php",
   "api": 2,
   "settings": "settings.json",
