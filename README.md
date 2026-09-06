@@ -1,30 +1,28 @@
 # Forecast
 
-Weltweite Wettervorhersagen von Open-Meteo als Erweiterung für weewx-php.
-PHP 8.1+, JSON und Erweiterungs-API 2. Kein Composer, ZIP oder eigener Cronjob
-auf dem Webhost nötig. Installation im Admin unter **Erweiterungen**.
+Worldwide weather forecasts from Open-Meteo as a weewx-php extension.
+Requires PHP 8.1+, JSON and extension API 2. The web host needs no Composer, ZIP
+or separate cron job. Install under **Extensions** in the admin.
 
-## Einstellungen
+## Settings
 
-Unter **Erweiterungen → Forecast** konfigurieren und anschließend aktivieren.
-Einstellungen funktionieren auch vor der Aktivierung. **Standardwerte** gelten
-für alle Archive; einzelne Archive können abweichen. Koordinaten und Zeitzone
-stammen aus der jeweiligen Archivkonfiguration.
+Configure under **Extensions → Forecast**, then activate. Settings are available
+before activation. **Defaults** apply to all archives; individual archives can
+override them. Coordinates and time zone come from each archive's configuration.
 
-| Feld | Standard | Bereich |
+| Field | Default | Range |
 |---|---|---|
-| Vorhersage | aktiv | aktiv / inaktiv je Archiv |
-| Tage | 7 | 1–16, einschließlich heute |
-| Abrufintervall | 3600 Sekunden | 1800–86400 Sekunden |
-| Timeout | 8 Sekunden | 1–30 Sekunden, zusätzlich durch Tick-Budget begrenzt |
-| API-Schlüssel | leer | optionaler Open-Meteo-Kundenschlüssel |
+| Forecast | enabled | enabled / disabled per archive |
+| Days | 7 | 1–16, including today |
+| Refresh interval | 3600 seconds | 1800–86400 seconds |
+| Timeout | 8 seconds | 1–30 seconds, further limited by the tick budget |
+| API key | empty | optional Open-Meteo customer key |
 
-Die kostenlose API ist für nicht kommerzielle Nutzung. Ein Kundenschlüssel
-aktiviert den festen HTTPS-Kundenendpunkt. Datenlizenz CC BY 4.0 und
-Zugangsbedingungen sind getrennt zu beachten.
-[Zugang](https://open-meteo.com/en/pricing), [API-Dokumentation](https://open-meteo.com/en/docs).
+The free API is for non-commercial use. A customer key activates the fixed HTTPS
+customer endpoint. The CC BY 4.0 data license and access terms apply separately.
+[Access](https://open-meteo.com/en/pricing), [API documentation](https://open-meteo.com/en/docs).
 
-Manuelle Konfiguration:
+Manual configuration:
 
 ```ini
 [Extensions]
@@ -41,22 +39,22 @@ Manuelle Konfiguration:
                 days = 10
 ```
 
-## Tick und Daten
+## Tick and data
 
-Pro Archiv höchstens eine Anfrage am bestehenden Tick, außerhalb der
-Archivsperre und unter der Erweiterungssperre. Auch der Besucher-Tick nutzt
-diese Hintergrundspur. Kein eigener Cron. `extensions run` führt optional
-einen Schritt aus. Fehler und unterbrochene Anfragen warten zehn Minuten.
-Gültige alte Daten bleiben als `stale` verfügbar. Der Abrufzeitpunkt bestimmt
-die Aktualität; zusätzlich wird ab lokalem Mitternacht neu geladen.
+The existing tick makes at most one request per archive, outside the archive
+lock and under the extension lock. The visitor tick uses the same background
+lane. No separate cron job is needed. `extensions run` optionally executes one
+step. Errors and interrupted requests trigger a ten-minute wait. Valid old data
+remain available as `stale`. Freshness is based on the fetch time; data are also
+refreshed after local midnight.
 
-Standort, Zeitzone, Tagesanzahl oder Schlüsseländerungen invalidieren den Cache.
-Dateien liegen privat in `data/extensions/forecast/<archiv-hash>/`. Maximal 1 MiB
-Antwortgröße, atomare Veröffentlichung nach Prüfung der Zeitachsen und Werte.
-Messarchive und Analytics enthalten diese Vorhersagen nicht. Nach einem Restore
-können die Cache-Daten erneut geladen werden.
+Changes to the location, time zone, number of days or key invalidate the cache.
+Files are private under `data/extensions/forecast/<archive-hash>/`. Responses are
+limited to 1 MiB and published atomically after validating time axes and values.
+Observation archives and analytics do not contain these forecasts. Cache data
+can be downloaded again after a restore.
 
-## Theme-Tags
+## Theme tags
 
 ```php
 use WeewxPhp\Frontend\Report;
@@ -77,10 +75,10 @@ if ($wx->hasTag('forecast.status')) {
 }
 ```
 
-`forecast.day`: Index 0–15 ab heute. Nicht verfügbare Tage liefern einen leeren
-Report ohne `date`. Werte: `outTempMin`, `outTempMax`, `rain`, `rainProbability`,
+`forecast.day`: index 0–15 starting today. Unavailable days return an empty
+report without `date`. Values: `outTempMin`, `outTempMax`, `rain`, `rainProbability`,
 `windSpeed`, `windGust`, `windDir`, `sunshineDur`, `weatherCode`.
-Metadaten: `start`, `end`, `date`, `source`, `fetched_at`.
+Metadata: `start`, `end`, `date`, `source`, `fetched_at`.
 
 ### Daily weather symbol
 
@@ -102,40 +100,40 @@ daily code is retained. Existing caches work immediately. Hourly codes, daily
 temperature ranges, precipitation totals and sunshine duration remain provider
 values. Today's symbol represents the whole daylight period even in the evening.
 
-`forecast.hourly`: 1–384 Stunden, begrenzt durch den Cache. Werte: `outTemp`,
+`forecast.hourly`: 1–384 hours, limited by the cache. Values: `outTemp`,
 `dewpoint`, `outHumidity`, `rain`, `rainProbability`, `radiation`, `cloudcover`,
 `windSpeed`, `windGust`, `windDir`, `weatherCode`, `snow`, `visibility`.
-Momentanwerte haben `start = end`; Niederschlag, Schnee, Wahrscheinlichkeit,
-Strahlung und Böen beziehen sich auf die vorangehende Stunde. Lokale Tage haben
-bei Sommerzeitwechseln 23 oder 25 Stunden. Nullwerte und echte Nullen bleiben
-erhalten. Ausgabeprofile und Einheitenumrechnung gelten auch für diese Tags.
+Instantaneous values have `start = end`; precipitation, snow, probability,
+radiation and gusts refer to the preceding hour. Local days have 23 or 25 hours
+at daylight saving time changes. Null values and actual zeros are preserved.
+Output profiles and unit conversion also apply to these tags.
 
-Reader laden nur lokale Daten. Ein historischer Messdatenbezug ändert den
-aktuellen Vorhersagezeitpunkt nicht. Das Demo-Theme zeigt die Tags automatisch
-an und blendet den Bereich bei deaktivierter Erweiterung aus.
-Quellen- und Lizenzangabe bei veröffentlichter Darstellung beibehalten:
+Readers load local data only. A historical observation reference does not change
+the current forecast reference time. The demo theme displays the tags automatically
+and hides the section when the extension is disabled.
+Keep source and license attribution in published displays:
 
 ```html
 <a href="https://open-meteo.com/">Open-Meteo</a> ·
 <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>
 ```
 
-## Umstieg aus dem früheren Core
+## Migrating from the former core implementation
 
-Zuerst das Paket installieren und noch keine Optionen speichern. Nach dem
-Core-Update mit Erweiterungs-API 2 einmal ausdrücklich aufrufen:
+Install the package first, without saving any options yet. After updating the
+core to extension API 2, explicitly run this command once:
 
 ```bash
 php /path/to/installed/forecast/tools/migrate.php /path/to/weewx-php /path/to/weewx-php.conf
 ```
 
-Das Werkzeug prüft die Paketdateien, übernimmt `enabled`, `days`, `every` und
-`timeout` je Archiv und entfernt die alten `[[[forecast]]]`-Abschnitte.
-Archive ohne alte Vorhersage bleiben deaktiviert. Gültige Caches werden kopiert;
-Messdaten bleiben unverändert. Bestehende neue Paketoptionen verursachen einen
-Konflikt. Wiederholung ohne Altabschnitte ändert nichts. Revision, Sperren und
-Recovery kommen vom Core. Themes wechseln von `$wx->forecast()` auf die Tags.
-`forecast fetch` wird durch `extensions run` ersetzt.
+The tool verifies package files, imports `enabled`, `days`, `every` and `timeout`
+per archive, and removes the old `[[[forecast]]]` sections. Archives without an
+old forecast remain disabled. Valid caches are copied; observations remain
+unchanged. Existing new package options cause a conflict. Running again without
+legacy sections changes nothing. Revision handling, locks and recovery come from
+the core. Themes switch from `$wx->forecast()` to the tags.
+`extensions run` replaces `forecast fetch`.
 
 ## Tests
 
@@ -148,5 +146,5 @@ docker compose -f "$WEEWX_PHP_ROOT/tests/docker/compose.yml" build unit
 docker compose -f tests/docker/compose.yml run --rm unit
 ```
 
-[Prüfbericht](docs/review.md). Die ursprünglichen Cache- und Darstellungsregeln
-stammen aus dem bisherigen weewx-php-Core.
+[Review](docs/review.md). The original cache and display rules come from the
+former weewx-php core implementation.
